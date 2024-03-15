@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { Game } from "./class/game";
 
-const rooms = new Map<String, Game>();
+export const rooms = new Map<String, Game>();
 
 export function setUpListers(io: Server) {
   io.on("connection", (socket) => {
