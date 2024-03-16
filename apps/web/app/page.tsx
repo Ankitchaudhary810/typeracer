@@ -1,9 +1,33 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { FormEvent } from "react";
+import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
 export default function Home() {
+  const router = useRouter();
+
+  function joinGame(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    const inviteCode = formData.get("inviteCode") as string;
+
+    if (!inviteCode) return toast.error("Invite code is required");
+
+    router.push(`/game/${inviteCode}`);
+  }
+
+  function createGame() {
+    const inviteCode = uuidv4();
+    router.push(`/game/${inviteCode}`);
+  }
+
   return (
     <main className="w-full mx-auto max-w-5xl p-5">
       <h1 className="font-bold text-4xl mt-10">Typing Battle</h1>
@@ -24,7 +48,9 @@ export default function Home() {
           </div>
 
           <div>
-            <Button className="mt-5 w-full">Create Game</Button>
+            <Button className="mt-5 w-full" onClick={createGame}>
+              Create Game
+            </Button>
           </div>
         </div>
 
@@ -38,7 +64,7 @@ export default function Home() {
           </div>
 
           <div className="mt-5">
-            <form>
+            <form onSubmit={joinGame}>
               <Input type="text" placeholder="Invite code" name="inviteCode" />
               <Button className="mt-3 w-full">Join Game</Button>
             </form>
