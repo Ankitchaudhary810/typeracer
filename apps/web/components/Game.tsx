@@ -8,7 +8,7 @@ import LeaderBoard from "./LeaderBoard";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 
-const Game = ({ gameId, name }: GameProps) => {
+export default function GamePlayer({ gameId, name }: GameProps) {
   const [ioInstance, setIoInstance] = useState<Socket>();
   const [players, setPlayers] = useState<Player[]>([]);
   const [gameStatus, setGameStatus] = useState<GameStatus>("not-started");
@@ -20,12 +20,10 @@ const Game = ({ gameId, name }: GameProps) => {
     const socket = io(process.env.NEXT_PUBLIC_WEBSOCKET_URL as string, {
       transports: ["websocket"],
     });
-
     setIoInstance(socket);
 
     socket.emit("join-game", gameId, name);
 
-    //clean up function
     return () => {
       removeListeners();
       socket.disconnect();
@@ -36,6 +34,13 @@ const Game = ({ gameId, name }: GameProps) => {
     setUpListeners();
     return () => removeListeners();
   }, [ioInstance]);
+
+  // useEffect for detecting changes in input paragraph
+  useEffect(() => {
+    if (!ioInstance || gameStatus !== "in-progress") return;
+
+    ioInstance.emit("player-typed", inputParagraph);
+  }, [inputParagraph]);
 
   function setUpListeners() {
     if (!ioInstance) return;
@@ -116,7 +121,7 @@ const Game = ({ gameId, name }: GameProps) => {
   };
 
   return (
-    <div className="w-screen p-10 grid grid-cols-1 log:grid-cols-3 gap-20">
+    <div className="w-screen p-10 grid grid-cols-1 lg:grid-cols-3 gap-20">
       {/* Leaderboard */}
       <div className="w-full order-last lg:order-first">
         <h2 className="text-2xl font-medium mb-10 mt-10 lg:mt-0">
@@ -185,6 +190,4 @@ const Game = ({ gameId, name }: GameProps) => {
       </div>
     </div>
   );
-};
-
-export default Game;
+}
